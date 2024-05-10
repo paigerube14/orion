@@ -29,7 +29,6 @@ def cli(max_content_width=120):
 
 # pylint: disable=too-many-locals, too-many-statements
 @click.command()
-@click.option("--previous",is_flag=True, help="compare results among previous release version")
 @click.option("--uuid", default="", help="UUID to use as base for comparisons")
 @click.option("--baseline", default="", help="Baseline UUID(s) to to compare against uuid")
 @click.option("--config", default="config.yaml", help="Path to the configuration file")
@@ -73,7 +72,7 @@ def orion(**kwargs):
         if uuid == "":
             metadata = orion_funcs.get_metadata(test, logger)
         else:
-            metadata = orion_funcs.filter_metadata(uuid, match,logger)
+            metadata = orion_funcs.filter_metadata(uuid,match,logger)
 
         logger.info("The test %s has started", test["name"])
         if baseline == "":

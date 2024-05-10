@@ -118,7 +118,7 @@ def get_metadata(test,logger):
     return metadata
 
 
-def filter_metadata(uuid,previous, match,logger):
+def filter_metadata(uuid,match,logger):
     """Gets metadata of the run from each test
 
     Args:
@@ -131,7 +131,6 @@ def filter_metadata(uuid,previous, match,logger):
     """
 
     test = match.get_metadata_by_uuid(uuid)
-    logging.info('test' + str(test))
     metadata = {
         'platform': '', 
         'clusterType': '', 
@@ -155,14 +154,8 @@ def filter_metadata(uuid,previous, match,logger):
         if k not in metadata:
             continue
         metadata[k] = v
-    
     metadata['benchmark.keyword'] = test['benchmark']
-    if previous: 
-
-        version = float(metadata["ocpVersion"][:4]) - .01
-    else: 
-        version = metadata["ocpVersion"]
-    metadata["ocpVersion"] = str(version)
+    metadata["ocpVersion"] = str(metadata["ocpVersion"])
 
     #Remove any keys that have blank values
     no_blank_meta = {k: v for k, v in metadata.items() if v}
