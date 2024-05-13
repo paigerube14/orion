@@ -29,6 +29,7 @@ def cli(max_content_width=120):
 
 # pylint: disable=too-many-locals, too-many-statements
 @click.command()
+@click.option("--cmr", is_flag=True, help="Generate percent difference in comparison")
 @click.option("--uuid", default="", help="UUID to use as base for comparisons")
 @click.option("--baseline", default="", help="Baseline UUID(s) to to compare against uuid")
 @click.option("--config", default="config.yaml", help="Path to the configuration file")
@@ -40,6 +41,7 @@ def orion(**kwargs):
 
     \b
     Args:
+        cmr (bool): generate percent difference in values
         uuid (str): gather metrics based on uuid
         baseline (str): baseline uuid to compare against uuid (uuid must be set when using baseline)
         config (str): path to the config file
@@ -101,18 +103,22 @@ def orion(**kwargs):
         metrics = test["metrics"]
         dataframe_list = orion_funcs.get_metric_data(ids, index, metrics, match, logger)
 
+
         for i, df in enumerate(dataframe_list):
             if i != 0:
                 dataframe_list[i] = df.drop(columns=['timestamp'])
 
-        merged_df = reduce(
-            lambda left, right: pd.merge(left, right, on="uuid", how="inner"),
-            dataframe_list,
-        )
+        if cmr: 
+            merged_df = orion_funcs.run_cmr(dataframe_list,logger)   
+        else: 
+            merged_df = reduce(
+                lambda left, right: pd.merge(left, right, on="uuid", how="left"),
+                dataframe_list,
+            )
 
-        shortener = pyshorteners.Shortener()
-        merged_df["buildUrl"] = merged_df["uuid"].apply(
-            lambda uuid: shortener.tinyurl.short(buildUrls[uuid])) #pylint: disable = cell-var-from-loop
+            shortener = pyshorteners.Shortener()
+            merged_df["buildUrl"] = merged_df["uuid"].apply(
+                lambda uuid: shortener.tinyurl.short(buildUrls[uuid])) #pylint: disable = cell-var-from-loop
         csv_name = kwargs["output"].split(".")[0]+"-"+test['name']+".csv"
         match.save_results(
             merged_df, csv_file_path=csv_name
