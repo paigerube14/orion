@@ -108,7 +108,8 @@ def orion(**kwargs):
         for i, df in enumerate(dataframe_list):
             dataframe_list[i] = df.drop(columns=['timestamp'])
 
-        if cmr: 
+        logger.info('len ' + str(len((dataframe_list[i]))))
+        if cmr and len(dataframe_list[i]) == 2: 
             merged_df = orion_funcs.run_cmr(20,dataframe_list,logger)   
 
         merged_df = reduce(

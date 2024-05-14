@@ -55,8 +55,6 @@ def run_cmr(tolerancy, dataframe_list,logger):
                 pass_fail = "Fail"
             dataframe_list[i].loc[len(dataframe_list[i].index)] = ["difference", single_pct_diff]
             dataframe_list[i].loc[len(dataframe_list[i].index)] = ["Pass/Fail", pass_fail]
-
-    logger.info('return_list '+str(dataframe_list))
     return dataframe_list
     
 
