@@ -48,11 +48,12 @@ def run_hunter_analyze(merged_df,test):
 def run_cmr(tolerancy, dataframe_list,logger):
     for i, df in enumerate(dataframe_list):
             column_name = df.columns.values.tolist()[-1]
-            pct_change_result = df[column_name].pct_change().iloc[[-1]].values[0] * 100
+            pct_change_result = df[column_name].pct_change()
+            single_pct_diff = pct_change_result.iloc[[-1]].values[0] * 100
             pass_fail = "Pass"
-            if pct_change_result > tolerancy:
+            if single_pct_diff > tolerancy:
                 pass_fail = "Fail"
-            dataframe_list[i].loc[len(dataframe_list[i].index)] = ["difference", pct_change_result]
+            dataframe_list[i].loc[len(dataframe_list[i].index)] = ["difference", single_pct_diff]
             dataframe_list[i].loc[len(dataframe_list[i].index)] = ["Pass/Fail", pass_fail]
 
     logger.info('return_list '+str(dataframe_list))
