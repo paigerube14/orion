@@ -54,6 +54,7 @@ def orion(**kwargs):
     logger = logging.getLogger("Orion")
     logger = orion_funcs.set_logging(level, logger)
     data = orion_funcs.load_config(kwargs["config"],logger)
+    cmr = kwargs['cmr']
     ES_URL=None
 
     if "ES_SERVER" in data.keys():
@@ -66,10 +67,10 @@ def orion(**kwargs):
             sys.exit(1)
     shortener = pyshorteners.Shortener()
     for test in data["tests"]:
+        index = test['index']
         benchmarkIndex=test['benchmarkIndex']
         uuid = kwargs["uuid"]
         baseline = kwargs["baseline"]
-        index = "ospst-perf-scale-ci-*"
         match = Matcher(index=index,
                         level=level, ES_URL=ES_URL, verify_certs=False)
         if uuid == "":
@@ -105,20 +106,19 @@ def orion(**kwargs):
 
 
         for i, df in enumerate(dataframe_list):
-            if i != 0:
-                dataframe_list[i] = df.drop(columns=['timestamp'])
+            dataframe_list[i] = df.drop(columns=['timestamp'])
 
         if cmr: 
-            merged_df = orion_funcs.run_cmr(dataframe_list,logger)   
-        else: 
-            merged_df = reduce(
-                lambda left, right: pd.merge(left, right, on="uuid", how="left"),
-                dataframe_list,
-            )
+            merged_df = orion_funcs.run_cmr(20,dataframe_list,logger)   
 
-            shortener = pyshorteners.Shortener()
-            merged_df["buildUrl"] = merged_df["uuid"].apply(
-                lambda uuid: shortener.tinyurl.short(buildUrls[uuid])) #pylint: disable = cell-var-from-loop
+        merged_df = reduce(
+            lambda left, right: pd.merge(left, right, on="uuid", how="left"),
+            dataframe_list,
+        )
+
+        shortener = pyshorteners.Shortener()
+        # merged_df["buildUrl"] = merged_df["uuid"].apply(
+        #     lambda uuid: shortener.tinyurl.short(buildUrls[uuid])) #pylint: disable = cell-var-from-loop
         csv_name = kwargs["output"].split(".")[0]+"-"+test['name']+".csv"
         match.save_results(
             merged_df, csv_file_path=csv_name

@@ -45,16 +45,19 @@ def run_hunter_analyze(merged_df,test):
     print(output)
     return change_points
 
-def run_cmr(dataframe_list,logger):
-     for i, df in enumerate(dataframe_list):
-            if i != 0:
-                logger.info('df columns '+str(df))
-                logger.info("data frame " + str(type(dataframe_list[i]))+ str(dataframe_list[i]))
-                logger.info('df columns '+str(dataframe_list[i].columns))
-                merged = pd.merge(dataframe_list[i].loc[0] , dataframe_list[i].loc[1], how="inner", left_index=True, right_index=True)
-                logger.info('merged' +str(merged) )
-                logger.info("size "  + str(str(merged.shape)))
+def run_cmr(tolerancy, dataframe_list,logger):
+    for i, df in enumerate(dataframe_list):
+            column_name = df.columns.values.tolist()[-1]
+            pct_change_result = df[column_name].pct_change().iloc[[-1]].values[0] * 100
+            pass_fail = "Pass"
+            if pct_change_result > tolerancy:
+                pass_fail = "Fail"
+            dataframe_list[i].loc[len(dataframe_list[i].index)] = ["difference", pct_change_result]
+            dataframe_list[i].loc[len(dataframe_list[i].index)] = ["Pass/Fail", pass_fail]
 
+    logger.info('return_list '+str(dataframe_list))
+    return dataframe_list
+    
 
 # pylint: disable=too-many-locals
 def get_metric_data(ids, index, metrics, match, logger):
