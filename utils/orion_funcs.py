@@ -45,7 +45,7 @@ def run_hunter_analyze(merged_df,test):
     print(output)
     return change_points
 
-def run_cmr(tolerancy, dataframe_list,logger):
+def run_cmr(tolerancy, dataframe_list):
     for i, df in enumerate(dataframe_list):
             column_name = df.columns.values.tolist()[-1]
             pct_change_result = df[column_name].pct_change()

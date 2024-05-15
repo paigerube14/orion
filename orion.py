@@ -108,18 +108,20 @@ def orion(**kwargs):
         for i, df in enumerate(dataframe_list):
             dataframe_list[i] = df.drop(columns=['timestamp'])
 
-        logger.info('len ' + str(len((dataframe_list[i]))))
         if cmr and len(dataframe_list[i]) == 2: 
-            merged_df = orion_funcs.run_cmr(20,dataframe_list,logger)   
+            merged_df = orion_funcs.run_cmr(20,dataframe_list)   
 
         merged_df = reduce(
             lambda left, right: pd.merge(left, right, on="uuid", how="left"),
             dataframe_list,
         )
 
-        shortener = pyshorteners.Shortener()
-        # merged_df["buildUrl"] = merged_df["uuid"].apply(
-        #     lambda uuid: shortener.tinyurl.short(buildUrls[uuid])) #pylint: disable = cell-var-from-loop
+        if cmr:
+            if 
+        else: 
+            shortener = pyshorteners.Shortener()
+            merged_df["buildUrl"] = merged_df["uuid"].apply(
+                lambda uuid: shortener.tinyurl.short(buildUrls[uuid])) #pylint: disable = cell-var-from-loop
         csv_name = kwargs["output"].split(".")[0]+"-"+test['name']+".csv"
         match.save_results(
             merged_df, csv_file_path=csv_name
