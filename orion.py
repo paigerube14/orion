@@ -30,6 +30,7 @@ def cli(max_content_width=120):
 # pylint: disable=too-many-locals, too-many-statements
 @click.command()
 @click.option("--cmr", is_flag=True, help="Generate percent difference in comparison")
+@click.option("--filter", is_flag=True, help="Generate percent difference in comparison")
 @click.option("--uuid", default="", help="UUID to use as base for comparisons")
 @click.option("--baseline", default="", help="Baseline UUID(s) to to compare against uuid")
 @click.option("--config", default="config.yaml", help="Path to the configuration file")
@@ -55,6 +56,7 @@ def orion(**kwargs):
     logger = orion_funcs.set_logging(level, logger)
     data = orion_funcs.load_config(kwargs["config"],logger)
     cmr = kwargs['cmr']
+    ignore_node_counts = kwargs['filter']
     ES_URL=None
 
     if "ES_SERVER" in data.keys():
@@ -95,12 +97,14 @@ def orion(**kwargs):
         if metadata["benchmark.keyword"] in ["ingress-perf","k8s-netperf"] :
             ids = uuids
         else:
-            if baseline == "":
+            if baseline == "" and not ignore_node_counts:
+                logger.info('Filter runs')
                 runs = match.match_kube_burner(uuids, index)
                 ids = match.filter_runs(runs, runs)
             else:
                 ids = uuids
 
+        logger.info('Ids' + str(ids))
         metrics = test["metrics"]
         dataframe_list = orion_funcs.get_metric_data(ids, index, metrics, match, logger)
 
@@ -116,13 +120,12 @@ def orion(**kwargs):
             dataframe_list,
         )
 
-        if cmr:
-            if 
-        else: 
+        if not cmr:
             shortener = pyshorteners.Shortener()
             merged_df["buildUrl"] = merged_df["uuid"].apply(
                 lambda uuid: shortener.tinyurl.short(buildUrls[uuid])) #pylint: disable = cell-var-from-loop
         csv_name = kwargs["output"].split(".")[0]+"-"+test['name']+".csv"
+        logger.info("Writing results to " + str(csv_name))
         match.save_results(
             merged_df, csv_file_path=csv_name
         )
