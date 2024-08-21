@@ -178,25 +178,6 @@ def filter_uuids_on_index(
         ids = uuids
     return ids
 
-
-def get_build_urls(index: str, uuids: List[str], match: Matcher):
-    """Gets metadata of the run from each test
-        to get the build url
-
-    Args:
-        uuids (list): str list of uuid to find build urls of
-        match: the fmatch instance
-
-
-    Returns:
-        dict: dictionary of the metadata
-    """
-
-    test = match.getResults("", uuids, index, {})
-    buildUrls = {run["uuid"]: run["buildUrl"] for run in test}
-    return buildUrls
-
-
 def process_test(
     test: Dict[str, Any],
     match: Matcher,
@@ -219,22 +200,58 @@ def process_test(
     fingerprint_index = test["index"]
 
     # getting metadata
+    # getting metadata
     metadata = extract_metadata_from_test(test) if options["uuid"] in ("", None) else get_metadata_with_uuid(options["uuid"], match)
     # get uuids, buildUrls matching with the metadata
-    runs = match.get_uuid_by_metadata(metadata, fingerprint_index, lookback_date=start_timestamp, lookback_size=options['lookback_size'])
+<<<<<<< HEAD
+    
     uuids = [run["uuid"] for run in runs]
     buildUrls = {run["uuid"]: run["buildUrl"] for run in runs}
+=======
+    # this match might not always work if UUID failed run, we still want to analyze
+    runs = match.get_uuid_by_metadata(metadata, fingerprint_index, lookback_date=start_timestamp, lookback_size=options['lookback_size'])
+
+    if options['previous_version']:
+        prev_runs = runs
+        metadata['ocpVersion'] = str(float(metadata['ocpVersion'][:4]) - .01)
+        runs = match.get_uuid_by_metadata(metadata, fingerprint_index, lookback_date=start_timestamp)
+
+        # if options['uuid'] is not set, set latest to most recent run of ocpVersion
+        if options["uuid"] in ("", None):
+            # get latest uuid as the "uuid" to compare against
+            print("previous + " + str(prev_runs[-1]))
+            print("previous + " + str(prev_runs[0]))
+            last_uuid_run = prev_runs[-1]
+            runs.append(last_uuid_run)
+    print('run ' + str(runs))
+>>>>>>> 2ee6491 (adding previous version option)
     # get uuids if there is a baseline
     if options["baseline"] not in ("", None):
-        uuids = [uuid for uuid in re.split(r" |,", options["baseline"]) if uuid]
-        uuids.append(options["uuid"])
-        buildUrls = get_build_urls(fingerprint_index, uuids, match)
-    elif not uuids:
+        baseline_uuids = [uuid for uuid in re.split(r" |,", options["baseline"]) if uuid]
+        baseline_uuids.append(options['uuid'])
+        runs = match.getResults("", baseline_uuids, fingerprint_index, {})
+    elif options['uuid']:
+        not_found = False
+        
+        for run in runs:
+            print('run ' + str(run))
+            print('option uuid ' + options['uuid'] + str(type(options['uuid'])))
+            print('run uuid ' + str((run['uuid']))+str(type(run['uuid'])))
+            if run['uuid'] == options['uuid']:
+                not_found = True
+        if not not_found:
+            uuid_run = match.getResults("", [options["uuid"]], fingerprint_index, {})[0]
+            runs.append(uuid_run)
+    print('run ' + str(runs))
+    buildUrls = {run["uuid"]: run["buildUrl"] for run in runs}
+
+    if not runs:
         logger.info("No UUID present for given metadata")
         return None, None
 
     benchmark_index = test["benchmarkIndex"]
-
+    #Want to set uuid list right before usage
+    uuids = [run["uuid"] for run in runs]
     uuids = filter_uuids_on_index(
         metadata, benchmark_index, uuids, match, options["baseline"], options['node_count']
     )
