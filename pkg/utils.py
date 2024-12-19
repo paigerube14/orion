@@ -203,11 +203,6 @@ def process_test(
     # getting metadata
     metadata = extract_metadata_from_test(test) if options["uuid"] in ("", None) else get_metadata_with_uuid(options["uuid"], match)
     # get uuids, buildUrls matching with the metadata
-<<<<<<< HEAD
-    
-    uuids = [run["uuid"] for run in runs]
-    buildUrls = {run["uuid"]: run["buildUrl"] for run in runs}
-=======
     # this match might not always work if UUID failed run, we still want to analyze
     runs = match.get_uuid_by_metadata(metadata, fingerprint_index, lookback_date=start_timestamp, lookback_size=options['lookback_size'])
 
@@ -224,7 +219,6 @@ def process_test(
             last_uuid_run = prev_runs[-1]
             runs.append(last_uuid_run)
     print('run ' + str(runs))
->>>>>>> 2ee6491 (adding previous version option)
     # get uuids if there is a baseline
     if options["baseline"] not in ("", None):
         baseline_uuids = [uuid for uuid in re.split(r" |,", options["baseline"]) if uuid]
