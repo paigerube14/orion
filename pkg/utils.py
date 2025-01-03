@@ -206,18 +206,6 @@ def process_test(
     # this match might not always work if UUID failed run, we still want to analyze
     runs = match.get_uuid_by_metadata(metadata, fingerprint_index, lookback_date=start_timestamp, lookback_size=options['lookback_size'])
 
-    if options['previous_version']:
-        prev_runs = runs
-        metadata['ocpVersion'] = str(float(metadata['ocpVersion'][:4]) - .01)
-        runs = match.get_uuid_by_metadata(metadata, fingerprint_index, lookback_date=start_timestamp)
-
-        # if options['uuid'] is not set, set latest to most recent run of ocpVersion
-        if options["uuid"] in ("", None):
-            # get latest uuid as the "uuid" to compare against
-            print("previous + " + str(prev_runs[-1]))
-            print("previous + " + str(prev_runs[0]))
-            last_uuid_run = prev_runs[-1]
-            runs.append(last_uuid_run)
     print('run ' + str(runs))
     # get uuids if there is a baseline
     if options["baseline"] not in ("", None):
