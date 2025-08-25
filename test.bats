@@ -187,14 +187,14 @@ setup() {
 @test "orion cmd chaos tests " {
   before_version=$version
   version=$chaos_version
-  scenario_type="pvc_scenarios" cloud_infrastructure="aws" cloud_type="self-managed" total_node_count="9" node_instance_type="m6a.xlarge" network_plugins="OVNKubernetes" scenario_file="*pvc_scenario.yaml" run_cmd orion cmd --config "examples/chaos_tests.yaml" --lookback 10d
+  scenario_type="pvc_scenarios" cloud_infrastructure="aws" cloud_type="self-managed" total_node_count="9" node_instance_type="m6a.xlarge" network_plugins="OVNKubernetes" scenario_file="*pvc_scenario.yaml" run_cmd orion cmd --config "examples/chaos_tests.yaml" --lookback 10d --output text
   version=$before_version
 }
 
 @test "orion cmd node scenarios " {
   before_version=$version
   version=$chaos_version
-  scenario_type="node_scenarios" cloud_infrastructure="AWS" cloud_type="self-managed" total_node_count="9" node_instance_type="*xlarge*" network_plugins="OVNKubernetes" scenario_file="*node_scenario.yaml" run_cmd orion cmd --config "examples/node_scenarios.yaml" --lookback 10d
+  scenario_type="node_scenarios" cloud_infrastructure="AWS" cloud_type="self-managed" total_node_count="9" node_instance_type="*xlarge*" network_plugins="OVNKubernetes" scenario_file="*node_scenario.yaml" run_cmd orion cmd --config "examples/node_scenarios.yaml" --lookback 10d --hunter-analyze
   version=$before_version
 }
 
